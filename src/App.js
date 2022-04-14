@@ -2,14 +2,6 @@ import './App.css';
 
 import React,  { useState, useRef, useEffect } from 'react'
 
-const WATCH_STATES = {
-  INITIAL: 'INITIAL',
-  START: 'START',
-  RUNNING: 'RUNNING',
-  RESUME: 'RESUME',
-  STOPPED: 'STOPPED',
-}
-
 const padToNDigits = (nDigits) => (num) => num.toString().padStart(nDigits, '0')
 
 const formatTime = milliseconds => {
