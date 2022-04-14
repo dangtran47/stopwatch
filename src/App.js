@@ -3,101 +3,132 @@ import './App.css';
 import React,  { useState, useRef, useEffect } from 'react'
 
 const WATCH_STATES = {
-  READY: 'READY',
+  INITIAL: 'INITIAL',
   START: 'START',
   RUNNING: 'RUNNING',
   RESUME: 'RESUME',
   STOPPED: 'STOPPED',
 }
 
+const padToNDigits = (nDigits) => (num) => num.toString().padStart(nDigits, '0')
+
+const formatTime = milliseconds => {
+  const ms = Math.floor(milliseconds % 1000)
+  const seconds = Math.floor(milliseconds / 1000) % 60
+  const minutes = Math.floor(milliseconds / (60 * 1000)) % 60
+  const hours = Math.floor(milliseconds / (60 * 60 * 1000)) % 60
+
+  return `${padToNDigits(2)(hours)}:${padToNDigits(2)(minutes)}:${padToNDigits(2)(seconds)}.${padToNDigits(3)(ms)}`
+}
+
+const Duration = ({ ms }) => <div>{formatTime(ms)}</div>
+
+
+const StopWatchInitial = ({ requestStart }) => (
+  <section>
+    <h4>Initial</h4>
+    <Duration ms={0} />
+    <footer>
+      <button onClick={requestStart}>Start</button>
+    </footer>
+  </section>
+)
+
+const StopWatchRunning = ({ ms, requestLap, requestStop }) => (
+  <section>
+    <h4>Running...</h4>
+    <Duration ms={ms} />
+    <footer>
+      <button onClick={requestStop}>Stop</button>
+      <button onClick={requestLap}>Lap</button>
+    </footer>
+  </section>
+)
+
+const StopWatchStopped = ({ ms, requestReset, requestResume }) => (
+  <section>
+    <h4>Stopped</h4>
+    <Duration ms={ms} />
+    <footer>
+      <button onClick={requestReset}>Reset</button>
+      <button onClick={requestResume}>Resume</button>
+    </footer>
+  </section>
+)
+
+const Hitory = ({ items }) => (
+  <ul>
+    {items.map(item => <li key={item}>{item}</li>)}
+  </ul>
+)
+
 function App() {
   const [count, setCount] = useState(0)
-  const [watchState, setWatchState] = useState(WATCH_STATES.READY)
-  const [history, setHistory] = useState([])
+  const [hasStarted, setHasStarted] = useState(false)
+  const [isPausing, setIsPausing] = useState(false)
+  const [historyList, setHistoryList] = useState([])
 
-  const requestRef = React.useRef();
-  const previousTimeRef = React.useRef(0);
+  const requestRef = React.useRef()
+  const previousTimeRef = React.useRef(0)
 
   const animate = time => {
-
-    switch(watchState) {
-      case WATCH_STATES.RUNNING:
-        const deltaTime = time - previousTimeRef.current
-        setCount(prevCount => prevCount + deltaTime)
-        previousTimeRef.current = time;
-        requestRef.current = requestAnimationFrame(animate);
+    switch(true) {
+      case !hasStarted:
+        previousTimeRef.current = time
         break
 
-      case WATCH_STATES.START:
-      case WATCH_STATES.RESUME:
-        setWatchState(WATCH_STATES.RUNNING)
-        previousTimeRef.current = time;
+      case hasStarted && !isPausing:
+        const deltaTime = time - previousTimeRef.current
+        setCount(prevCount => prevCount + deltaTime)
+        previousTimeRef.current = time
+        requestRef.current = requestAnimationFrame(animate)
+        break
+
+      case hasStarted && isPausing:
+        previousTimeRef.current = time
+        requestRef.current = requestAnimationFrame(animate)
         break
     }
   }
 
   React.useEffect(() => {
-    requestRef.current = requestAnimationFrame(animate);
+    requestRef.current = requestAnimationFrame(animate)
 
-    return () => cancelAnimationFrame(requestRef.current);
-  }, [watchState]);
-
-  const destructTime = (time) => ({
-    milisec: Math.round(time % 1000),
-    sec: Math.round(time / 1000) % 60,
-    min: Math.round(time / 60000) % 60
-  })
+    return () => cancelAnimationFrame(requestRef.current)
+  }, [hasStarted, isPausing])
 
   const handleStart = () => {
-    setWatchState(WATCH_STATES.START)
+    setHasStarted(true)
   }
 
   const handleReset = () => {
-    setHistory([])
-    setWatchState(WATCH_STATES.READY)
+    setHistoryList([])
+    setHasStarted(false)
+    setIsPausing(false)
     setCount(0)
   }
 
   const handleStop = () => {
-    setWatchState(WATCH_STATES.STOPPED)
+    setIsPausing(true)
   }
 
   const handleResume = () => {
-    setWatchState(WATCH_STATES.RESUME)
+    setIsPausing(false)
   }
 
   const handleLap = () => {
-    const { min, sec, milisec } = destructTime(count)
-    setHistory([`${min}, ${sec}, ${milisec}`, ...history].slice(0,10))
+    setHistoryList([formatTime(count), ...historyList].slice(0,10))
   }
-
-  const { min, sec, milisec } = destructTime(count)
 
   return (
     <div>
-      <div>{min}, {sec}, {milisec}</div>
+      { !hasStarted && <StopWatchInitial requestStart={handleStart} /> }
 
-      { watchState === WATCH_STATES.READY && <div onClick={handleStart}>Start</div> }
-      { watchState === WATCH_STATES.RUNNING &&
-        <>
-          <div onClick={handleStop}>Stop</div>
-          <div onClick={handleLap}>Lap</div>
-        </>
-      }
-      { watchState === WATCH_STATES.STOPPED &&
-        <>
-          <div onClick={handleReset}>Reset</div>
-          <div onClick={handleResume}>Resume</div>
-        </>
-      }
+      { hasStarted && !isPausing && <StopWatchRunning ms={count} requestLap={handleLap} requestStop={handleStop} /> }
 
-      <ul>
-        {history.map(time =>
-          <li key={time}>{time}</li>
-        )}
-      </ul>
+      { hasStarted && isPausing && <StopWatchStopped ms={count} requestReset={handleReset} requestResume={handleResume} /> }
 
-      <div>{watchState}</div>
+      <Hitory items={historyList}/>
     </div>
   )
 }
