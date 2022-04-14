@@ -60,8 +60,8 @@ function App() {
   const [isPausing, setIsPausing] = useState(false)
   const [historyList, setHistoryList] = useState([])
 
-  const requestRef = React.useRef()
-  const previousTimeRef = React.useRef(0)
+  const requestRef = useRef()
+  const previousTimeRef = useRef(0)
 
   const animate = time => {
     switch(true) {
@@ -83,7 +83,7 @@ function App() {
     }
   }
 
-  React.useEffect(() => {
+  useEffect(() => {
     requestRef.current = requestAnimationFrame(animate)
 
     return () => cancelAnimationFrame(requestRef.current)
