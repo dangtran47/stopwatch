@@ -1,6 +1,7 @@
 import './App.css';
 
 import React,  { useState, useRef, useEffect } from 'react'
+import isEmpty from 'lodash/isEmpty'
 
 const padToNDigits = (nDigits) => (num) => num.toString().padStart(nDigits, '0')
 
@@ -48,12 +49,14 @@ const StopWatchStopped = ({ ms, requestReset, requestResume }) => (
 )
 
 const Hitory = ({ items }) => (
-  <div className="history">
-    <div>Laps</div>
-    <ul>
-      {items.map(item => <li className="history-item" key={item}>{item}</li>)}
-    </ul>
-  </div>
+  isEmpty(items)
+    ? <></>
+    :<div className="history">
+      <div>Laps</div>
+      <ul>
+        {items.map(item => <li className="history-item" key={item}>{item}</li>)}
+      </ul>
+    </div>
 )
 
 function App() {
@@ -67,11 +70,6 @@ function App() {
 
   const animate = time => {
     switch(true) {
-      case !hasStarted:
-        previousTimeRef.current = time
-        requestRef.current = requestAnimationFrame(animate)
-        break
-
       case hasStarted && !isPausing:
         const deltaTime = time - previousTimeRef.current
         setCount(prevCount => prevCount + deltaTime)
@@ -79,7 +77,7 @@ function App() {
         requestRef.current = requestAnimationFrame(animate)
         break
 
-      case hasStarted && isPausing:
+      case !hasStarted || isPausing:
         previousTimeRef.current = time
         requestRef.current = requestAnimationFrame(animate)
         break
