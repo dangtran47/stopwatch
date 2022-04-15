@@ -1,38 +1,67 @@
-.App {
-  text-align: center;
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+.container {
+  margin: 50vh auto;
+  transform: translateY(-50%);
+  border-radius: 3px;
+  background: #eeeeee;
+  height: 500px;
+  width: 300px;
+  padding: 10px
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+.counter {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  gap: 10px;
 }
 
-.App-link {
-  color: #61dafb;
+.watch-state {
+  font-size: 16px;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.watch-state.initial {
+  color: #aa00ff;
+}
+
+.watch-state.running {
+  color: #388e3c;
+}
+
+.watch-state.stopped {
+  color: #e64a19;
+}
+
+.duration {
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.button {
+  width: 80px;
+  height: 30px;
+  background: #2567d9;
+  border: 1px solid #2567d9;
+  border-radius: 3px;
+  color: #ffffff;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 600;
+  margin-right: 5px;
+}
+
+.history {
+  font-size: 16px;
+  font-weight: 600;
+  margin-top: 10px;
+}
+
+.history .history-item {
+  font-size: 24px;
+  list-style: none;
+  margin-left: 10px;
 }

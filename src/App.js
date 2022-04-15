@@ -13,45 +13,47 @@ const formatTime = milliseconds => {
   return `${padToNDigits(2)(hours)}:${padToNDigits(2)(minutes)}:${padToNDigits(2)(seconds)}.${padToNDigits(3)(ms)}`
 }
 
-const Duration = ({ ms }) => <div>{formatTime(ms)}</div>
-
+const Duration = ({ ms }) => <div className="duration">{formatTime(ms)}</div>
 
 const StopWatchInitial = ({ requestStart }) => (
-  <section>
-    <h4>Initial</h4>
+  <section className="counter">
+    <h4 className="watch-state initial">Initial</h4>
     <Duration ms={0} />
     <footer>
-      <button onClick={requestStart}>Start</button>
+      <button className="button" onClick={requestStart}>Start</button>
     </footer>
   </section>
 )
 
 const StopWatchRunning = ({ ms, requestLap, requestStop }) => (
-  <section>
-    <h4>Running...</h4>
+  <section className="counter">
+    <h4 className="watch-state running">Running...</h4>
     <Duration ms={ms} />
     <footer>
-      <button onClick={requestStop}>Stop</button>
-      <button onClick={requestLap}>Lap</button>
+      <button className="button" onClick={requestStop}>Stop</button>
+      <button className="button" onClick={requestLap}>Lap</button>
     </footer>
   </section>
 )
 
 const StopWatchStopped = ({ ms, requestReset, requestResume }) => (
-  <section>
-    <h4>Stopped</h4>
+  <section className="counter">
+    <h4 className="watch-state stopped">Stopped</h4>
     <Duration ms={ms} />
     <footer>
-      <button onClick={requestReset}>Reset</button>
-      <button onClick={requestResume}>Resume</button>
+      <button className="button" onClick={requestReset}>Reset</button>
+      <button className="button" onClick={requestResume}>Resume</button>
     </footer>
   </section>
 )
 
 const Hitory = ({ items }) => (
-  <ul>
-    {items.map(item => <li key={item}>{item}</li>)}
-  </ul>
+  <div className="history">
+    <div>Laps</div>
+    <ul>
+      {items.map(item => <li className="history-item" key={item}>{item}</li>)}
+    </ul>
+  </div>
 )
 
 function App() {
@@ -67,6 +69,7 @@ function App() {
     switch(true) {
       case !hasStarted:
         previousTimeRef.current = time
+        requestRef.current = requestAnimationFrame(animate)
         break
 
       case hasStarted && !isPausing:
@@ -113,7 +116,7 @@ function App() {
   }
 
   return (
-    <div>
+    <div className="container">
       { !hasStarted && <StopWatchInitial requestStart={handleStart} /> }
 
       { hasStarted && !isPausing && <StopWatchRunning ms={count} requestLap={handleLap} requestStop={handleStop} /> }
