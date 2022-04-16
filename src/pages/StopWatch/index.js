@@ -6,30 +6,24 @@ import StopWatchStopped from './StopWatchStopped'
 import History from './History'
 import './index.css'
 
-import timeReducer, { initState } from '../../reducers/time'
+import { timeReducer } from '../../reducers'
+import { initState as timeInitialState } from '../../reducers/time'
 import { startAction, stopAction, resumeAction, resetAction, lapAction, updateCountAction } from '../../actions'
+import { useNow } from '../../hooks'
 
 export default () => {
-  const [{ count, hasStarted, isPausing, historyList }, dispatch] = useReducer(timeReducer, initState)
+  const [{ count, hasStarted, isPausing, historyList }, dispatch] = useReducer(timeReducer, timeInitialState)
+  const now = useNow()
 
-  const requestRef = useRef()
   const previousTimeRef = useRef(0)
 
-  const animate = time => {
+  useEffect(() => {
     if (hasStarted && !isPausing) {
-      const deltaTime = time - previousTimeRef.current
-      dispatch(updateCountAction(deltaTime))
+      dispatch(updateCountAction(now - previousTimeRef.current))
     }
 
-    previousTimeRef.current = time
-    requestRef.current = requestAnimationFrame(animate)
-  }
-
-  useEffect(() => {
-    requestRef.current = requestAnimationFrame(animate)
-
-    return () => cancelAnimationFrame(requestRef.current)
-  }, [hasStarted, isPausing])
+    previousTimeRef.current = now
+  }, [hasStarted, isPausing, now])
 
   const handleStart = () => dispatch(startAction())
 
